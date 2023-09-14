@@ -1,0 +1,86 @@
+<h1> 野菜投稿サイト</h1>
+<h3>野菜詳細</h3>
+<div class="post">
+  <p><%= @post.meet %></p>
+  <p><%= @post.created_at %></p>
+
+  <% if user_signed_in? %>
+  <% if current_user.already_liked?(@post) %>
+  <%= link_to post_like_path(@post), method: :delete do %>
+      <p>いいねを取り消す</p><%= @post.likes.count %>
+      <i class="fas fa-heart"></i><%= @post.likes.count %>
+    <% end %>
+    
+  <% else %>
+    <%= link_to post_likes_path(@post), method: :post do %>
+      <p>いいね</p><%= @post.likes.count %>
+      <i class="far fa-heart"></i><%= @post.likes.count %>
+    <% end %>
+  <% end %>
+<% else %>
+  <p>いいねの数 = </p><%= @post.likes.count %>
+  <i class="far fa-heart"></i><%= @post.likes.count %>
+<% end %>
+<%= link_to "編集する", edit_post_path(@post.id) %>
+</div>
+<%= link_to "Post一覧に戻る", posts_path %>
+
+
+<div class="comment-wrapper">
+  <p>コメント一覧</p>
+  <% @comments.each do |c| %>
+    <div>
+      <%= c.user.email unless c.user.blank? %>
+      <br>
+      <%= c.content %>
+    </div>
+      <br>
+  <% end %>
+
+  <% if user_signed_in? %>
+    <%= form_with(model: [@post, @comment], local: true) do |f| %>
+      <%= f.text_area :content %>
+      <%= button_tag type: "submit" do %>
+        <i class="far fa-comments"></i> コメントする
+      <% end %>
+    <% end %>
+  <% end %>
+</div>
+
+<p><投稿内容</p>
+  <%= @post.meet %>
+
+<p>ハッシュタグ</p>
+  <strong>Hashbody:</strong>
+  <%= render_with_hashtags(@post.hashbody) %>
+
+
+<div id='map'></div>
+
+<style>
+#map {
+  height: 600px;
+  width: 100%;
+}
+</style>
+
+<!-- js部分 -->
+<script>
+//初期マップの設定
+let map
+let marker
+function initMap(){
+  geocoder = new google.maps.Geocoder()
+
+  map = new google.maps.Map(document.getElementById('map'), {
+    center:  {lat: <%= @post.lat %>, lng: <%= @post.lng %>},
+    zoom: 15,
+  });
+
+   marker = new google.maps.Marker({
+    position:  {lat: <%= @post.lat %>, lng: <%= @post.lng %>},
+    map: map
+  });
+}
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA3Em58DpQary4q4c7aoCbcTgQ-wui0sn0I&callback=initMap" async defer></script>
